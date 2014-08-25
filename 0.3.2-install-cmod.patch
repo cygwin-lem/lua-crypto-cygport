@@ -1,0 +1,11 @@
+--- origsrc/luacrypto-0.3.2/configure.ac	2013-04-25 05:05:18.000000000 -0500
++++ src/luacrypto-0.3.2/configure.ac	2014-08-25 11:02:55.733275300 -0500
+@@ -31,7 +31,7 @@ PKG_CHECK_MODULES([OPENSSL], [openssl])
+ PKG_CHECK_MODULES([LUA], [lua])
+ 
+ # lua libdir
+-LUALIBDIR="`$PKGCONFIG --variable=libdir lua`"
++LUALIBDIR="`$PKGCONFIG --variable=INSTALL_CMOD lua`"
+ 
+ # dest of headers
+ CRYPTOINC="${includedir}/${PACKAGE_NAME}"

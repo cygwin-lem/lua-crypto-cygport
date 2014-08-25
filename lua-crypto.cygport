@@ -1,0 +1,22 @@
+inherit lua
+
+NAME="lua-crypto"
+VERSION=0.3.2
+RELEASE=1
+CATEGORY="Lua"
+SUMMARY="Lua OpenSSL bindings"
+DESCRIPTION="LuaCrypto provides a Lua frontend to the OpenSSL cryptographic
+library. The OpenSSL features that are currently exposed are digests (MD5,
+SHA-1, HMAC, and more) and crypto-grade random number generators."
+HOMEPAGE="https://mkottman.github.io/luacrypto/"
+SRC_URI="https://github.com/mkottman/luacrypto/archive/${VERSION}/luacrypto-${VERSION}.tar.gz"
+SRC_DIR="luacrypto-${VERSION}"
+PATCH_URI="
+	0.3.2-install-cmod.patch
+	0.3.2-no-undefined.patch
+"
+
+PKG_NAMES="${NAME} ${NAME}-devel"
+lua_crypto_CONTENTS=${LUA_LIBDIR#/}" usr/share/doc/"
+lua_crypto_devel_REQUIRES=${NAME}
+lua_crypto_devel_CONTENTS="usr/include/ usr/lib/pkgconfig/"
