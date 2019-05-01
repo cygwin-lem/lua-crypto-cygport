@@ -1,0 +1,11 @@
+--- origsrc/luacrypto-0.3.2/src/lcrypto.c	2013-04-25 06:05:18.000000000 -0400
++++ src/luacrypto-0.3.2/src/lcrypto.c	2019-05-01 11:14:35.714288900 -0400
+@@ -33,7 +33,7 @@
+ 
+ LUACRYPTO_API int luaopen_crypto(lua_State *L);
+ 
+-#if LUA_VERSION_NUM >= 502
++#if LUA_VERSION_NUM >= 502 && !defined LUA_COMPAT_5_2
+ 
+ static void luaL_register (lua_State *L, const char *libname, const luaL_Reg *l)
+ {

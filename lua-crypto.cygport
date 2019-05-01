@@ -2,7 +2,7 @@ inherit lua
 
 NAME="lua-crypto"
 VERSION=0.3.2
-RELEASE=2
+RELEASE=3
 CATEGORY="Lua"
 SUMMARY="Lua OpenSSL bindings"
 DESCRIPTION="LuaCrypto provides a Lua frontend to the OpenSSL cryptographic
@@ -12,6 +12,7 @@ HOMEPAGE="https://mkottman.github.io/luacrypto/"
 SRC_URI="https://github.com/mkottman/luacrypto/archive/${VERSION}/luacrypto-${VERSION}.tar.gz"
 SRC_DIR="luacrypto-${VERSION}"
 PATCH_URI="
+	0.3.2-compat52.patch
 	0.3.2-install-cmod.patch
 	0.3.2-no-undefined.patch
 "
@@ -20,3 +21,7 @@ PKG_NAMES="${NAME} ${NAME}-devel"
 lua_crypto_CONTENTS=${LUA_LIBDIR#/}" usr/share/doc/"
 lua_crypto_devel_REQUIRES=${NAME}
 lua_crypto_devel_CONTENTS="usr/include/ usr/lib/pkgconfig/"
+
+# not compatible with OpenSSL 1.1
+export PKG_CONFIG_PATH="/usr/lib/openssl-1.0/lib/pkgconfig"
+DEPS_PATH="/usr/lib/openssl-1.0/lib/pkgconfig"
