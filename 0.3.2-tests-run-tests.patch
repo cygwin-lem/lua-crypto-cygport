@@ -1,0 +1,11 @@
+--- origsrc/luacrypto-0.3.2/tests/run-tests	2016-07-07 07:25:32.000000000 +0900
++++ src/luacrypto-0.3.2/tests/run-tests
+@@ -4,7 +4,7 @@
+ 
+ for i in $DIR/*.lua; do
+   echo "Running: $i"
+-  lua $i
++  lua${LUA_VERSION} $i
+   if [ $? -ne 0 ]; then
+     echo "ERROR: $i failed"
+     exit 1

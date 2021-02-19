@@ -1,0 +1,12 @@
+--- origsrc/luacrypto-0.3.2/tests/Makefile.am	2016-07-07 07:25:32.000000000 +0900
++++ src/luacrypto-0.3.2/tests/Makefile.am
+@@ -1,7 +1,7 @@
+ all: *.lua
+-	cp ../src/.libs/crypto.so crypto.so
++	cp ../src/.libs/crypto.dll crypto.dll
+ 	./run-tests
+ 
+ clean-local:
+-	rm -f crypto.so
++	rm -f crypto.dll
+ 	rm -f *.pem

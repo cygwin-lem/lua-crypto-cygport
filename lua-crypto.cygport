@@ -1,27 +1,162 @@
-inherit lua
-
 NAME="lua-crypto"
-VERSION=0.3.2
-RELEASE=3
+VERSION=0.3.2p4
+RELEASE=1
 CATEGORY="Lua"
 SUMMARY="Lua OpenSSL bindings"
-DESCRIPTION="LuaCrypto provides a Lua frontend to the OpenSSL cryptographic
-library. The OpenSSL features that are currently exposed are digests (MD5,
-SHA-1, HMAC, and more) and crypto-grade random number generators."
-HOMEPAGE="https://mkottman.github.io/luacrypto/"
-SRC_URI="https://github.com/mkottman/luacrypto/archive/${VERSION}/luacrypto-${VERSION}.tar.gz"
-SRC_DIR="luacrypto-${VERSION}"
-PATCH_URI="
-	0.3.2-compat52.patch
-	0.3.2-install-cmod.patch
-	0.3.2-no-undefined.patch
+DESCRIPTION="\
+*** This project is DEPRECATED, use luaossl. ***
+LuaCrypto provides a Lua frontend to the OpenSSL cryptographic library.
+The OpenSSL features that are currently exposed are digests (MD5, SHA-1,
+HMAC, and more) and crypto-grade random number generators.
+"
+HOMEPAGE="https://github.com/starius/luacrypto/"
+
+GIT_REPO="https://github.com/starius/luacrypto"
+declare -A GIT_DATEHASH_BY_NAME=(
+  # git log --date=iso-strict --format='%cd/%H' -1
+  [0.3.2p4]=2016-07-07T01:25:32+03:00/fde4d88774c0d4d4444b33f11c60438c43524c2d
+  [0.3.2]=2013-04-25T12:05:18+02:00/0.3.2
+)
+REV_HASH="${GIT_DATEHASH_BY_NAME[${VERSION}]#*/}"
+REV_DATE="${GIT_DATEHASH_BY_NAME[${VERSION}]%%/*}"
+REV_DATE_SHORT="${REV_DATE%%T*}"
+GIT_BASENAME="${GIT_REPO##*/}"
+SRC_URI="${GIT_REPO}/archive/${REV_HASH}/${GIT_BASENAME}-${VERSION}.tar.gz"
+SRC_DIR="${GIT_BASENAME}-${REV_HASH#v}"
+
+################################
+LUA_VERSIONS="5.3:5.4"
+LUA_PKG_NAME="crypto"
+source lua.experiment
+
+################################
+## Patch files
+################################
+# Patch filenames are in a default style of 'git format-patch'
+PATCH_URI=$(\
+  find -maxdepth 1 -type f -name '[0-9][0-9][0-9][0-9]-*.patch' \
+  | sort \
+)
+# Additional patches, if any
+PATCH_URI+="
+  0.3.2-compat52.patch
+  0.3.2-install-cmod.patch
+  0.3.2-no-undefined.patch
+  0.3.2-luacrypto_pc.patch
+  0.3.2-tests-Makefile_am.patch
+  0.3.2-tests-run-tests.patch
 "
 
-PKG_NAMES="${NAME} ${NAME}-devel"
-lua_crypto_CONTENTS=${LUA_LIBDIR#/}" usr/share/doc/"
-lua_crypto_devel_REQUIRES=${NAME}
-lua_crypto_devel_CONTENTS="usr/include/ usr/lib/pkgconfig/"
+################################
+## Requirements for building
+################################
+BUILD_REQUIRES="\
+  pkg-config\
+  lua53-devel\
+  lua54-devel\
+  libssl1.0-devel\
+"
+# TEST_REQUIRES="\
+# "
 
+################################
+ABI=0
+
+
+################################
+_CYGPORT_RESTRICT_postinst_doc_=1
+
+set_packages_lua() {
+  local LUA_VERSION=$1
+  local LUA_PKG_NAME=$2
+
+  __add_pkg "lua${LUA_CYG_V[${LUA_VERSION}]}-${LUA_PKG_NAME}"
+  __set_pkg_property . CONTENTS "
+    usr/share/doc/lua${LUA_CYG_V[${LUA_VERSION}]}-*
+    usr/*/lua/${LUA_VERSION}/
+  "
+  __set_pkg_property . REQUIRES "lua${LUA_CYG_V[${LUA_VERSION}]}"
+  __set_pkg_property . REQUIRES_SUPPRESS "${COMMON_REQUIRES_SUPPRESS}"
+
+  __add_pkg "lua${LUA_CYG_V[${LUA_VERSION}]}-${LUA_PKG_NAME}-devel"
+  __set_pkg_property . CONTENTS "\
+    ${LUA_INC_V[${LUA_VERSION}]#/}
+    usr/lib/pkgconfig/lua${LUA_VERSION}*
+  "
+  __set_pkg_property . REQUIRES "lua${LUA_CYG_V[${LUA_VERSION}]}-${LUA_PKG_NAME}"
+}
+
+set_packages() {
+  local LUA_PKG_NAME=$1
+  local LUA_VERSION
+  COMMON_REQUIRES_SUPPRESS=
+  for LUA_VERSION in ${LUA_VERSIONS//:/ }; do
+    COMMON_REQUIRES_SUPPRESS+=" lua${LUA_CYG_V[${LUA_VERSION}]}-${LUA_PKG_NAME}"
+  done
+
+  for LUA_VERSION in ${LUA_VERSIONS//:/ }; do
+    set_packages_lua ${LUA_VERSION} ${LUA_PKG_NAME}
+  done
+}
+
+set_packages ${LUA_PKG_NAME}
+
+################################
+src_compile_lua() {
+  local LUA_VERSION=$1
+  local LUA_PKG_NAME=$2
+  mkdir -p ${B}/${LUA_VERSION}
+  cd  ${B}/${LUA_VERSION}
+  inform "[Compile] Lua ${LUA_VERSION}: ${LUA_PKG_NAME}"
+
+  cpdirs ${S} .
+
+  cygautoreconf
+  cygconf \
+    LUA_VERSION="${LUA_VERSION}" \
+    LUA_CFLAGS="${LUA_CFLAGS_V[${LUA_VERSION}]}" \
+    LUA_LIBS="${LUA_LIBS_V[${LUA_VERSION}]}" \
+    --includedir="${LUA_INC_V[${LUA_VERSION}]}" \
+    --docdir="/usr/share/doc/lua${LUA_CYG_V[${LUA_VERSION}]}-${LUA_PKG_NAME}" \
+    --htmldir="/usr/share/doc/lua${LUA_CYG_V[${LUA_VERSION}]}-${LUA_PKG_NAME}/html" \
+    ;
+  cygmake
+}
+
+################################
+src_install_lua() {
+  local LUA_VERSION=$1
+  local LUA_PKG_NAME=$2
+  cd ${B}/${LUA_VERSION}
+  inform "[Install] Lua ${LUA_VERSION}: ${LUA_PKG_NAME}"
+
+  cyginstall
+  dodir /usr/lib/pkgconfig/lua${LUA_VERSION}
+  mv ${D}/usr/lib/pkgconfig/{,lua${LUA_VERSION}/}luacrypto.pc
+  # dosym ./lua${LUA_VERSION}/luacrypto.pc /usr/lib/pkgconfig/lua${LUA_VERSION}-luacrypto.pc
+}
+
+################################
+src_test_lua() {
+  local LUA_VERSION=$1
+  local LUA_PKG_NAME=$2
+  cd ${B}/${LUA_VERSION}
+  inform "[Test] Lua ${LUA_VERSION}: ${LUA_PKG_NAME}"
+  lua${LUA_VERSION} -v
+
+  local TEST_LUA_PATH=$(lua_path_test ${LUA_VERSION})
+  local TEST_LUA_CPATH=$(lua_cpath_test ${LUA_VERSION})
+
+  printf '%s\n' "LUA_PATH=${TEST_LUA_PATH}"
+  printf '%s\n' "LUA_CPATH=${TEST_LUA_CPATH}"
+
+  LUA_VERSION="${LUA_VERSION}" \
+  LUA_PATH="${TEST_LUA_PATH}" \
+  LUA_CPATH="${TEST_LUA_CPATH}" \
+  make -C tests
+}
+
+################################
 # not compatible with OpenSSL 1.1
 export PKG_CONFIG_PATH="/usr/lib/openssl-1.0/lib/pkgconfig"
 DEPS_PATH="/usr/lib/openssl-1.0/lib/pkgconfig"
