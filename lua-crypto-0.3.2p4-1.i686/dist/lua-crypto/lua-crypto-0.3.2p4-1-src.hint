@@ -7,5 +7,4 @@ The OpenSSL features that are currently exposed are digests (MD5, SHA-1,
 HMAC, and more) and crypto-grade random number generators.
 "
 skip:
-test:
 homepage: https://github.com/starius/luacrypto/

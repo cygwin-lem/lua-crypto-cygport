@@ -8,4 +8,3 @@ HMAC, and more) and crypto-grade random number generators.
 "
 obsoletes:       lua-crypto     
 external-source: lua-crypto
-test:

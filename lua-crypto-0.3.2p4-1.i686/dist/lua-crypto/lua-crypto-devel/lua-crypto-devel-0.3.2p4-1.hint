@@ -5,4 +5,3 @@ ldesc: "The lua-crypto-devel package is obsolete.  Selecting this package for
 installation will cause the lua53-crypto-devel package, which replaces this
 one, to be installed instead."
 external-source: lua-crypto
-test:

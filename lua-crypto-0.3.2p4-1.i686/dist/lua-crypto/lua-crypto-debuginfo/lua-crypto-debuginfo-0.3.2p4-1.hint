@@ -4,4 +4,3 @@ external-source: lua-crypto
 sdesc: "Debug info for lua-crypto"
 ldesc: "This package contains files necessary for debugging the
 lua-crypto package with gdb."
-test:
