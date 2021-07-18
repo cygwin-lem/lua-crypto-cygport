@@ -87,6 +87,8 @@ set_packages_lua() {
 }
 
 set_packages_lua_versions ${LUA_VERSIONS} ${LUA_PKG_NAME}
+__set_pkg_property lua53-${LUA_PKG_NAME} OBSOLETES "lua-${LUA_PKG_NAME}"
+__set_pkg_property lua53-${LUA_PKG_NAME}-devel OBSOLETES "lua-${LUA_PKG_NAME}-devel"
 
 ################################
 src_compile_lua() {
