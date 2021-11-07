@@ -1,27 +1,82 @@
 inherit lua
 
 NAME="lua-crypto"
-VERSION=0.3.2
-RELEASE=3
+VERSION=0.3.2p4
+RELEASE=1
 CATEGORY="Lua"
 SUMMARY="Lua OpenSSL bindings"
-DESCRIPTION="LuaCrypto provides a Lua frontend to the OpenSSL cryptographic
-library. The OpenSSL features that are currently exposed are digests (MD5,
-SHA-1, HMAC, and more) and crypto-grade random number generators."
-HOMEPAGE="https://mkottman.github.io/luacrypto/"
-SRC_URI="https://github.com/mkottman/luacrypto/archive/${VERSION}/luacrypto-${VERSION}.tar.gz"
-SRC_DIR="luacrypto-${VERSION}"
+DESCRIPTION="\
+*** This project is DEPRECATED, use luaossl. ***
+LuaCrypto provides a Lua frontend to the OpenSSL cryptographic library.
+The OpenSSL features that are currently exposed are digests (MD5, SHA-1,
+HMAC, and more) and crypto-grade random number generators.
+"
+HOMEPAGE="https://github.com/starius/luacrypto/"
+
+GIT_REPO="https://github.com/starius/luacrypto"
+declare -A GIT_DATEHASH_BY_NAME=(
+  # git log --date=iso-strict --format='%cd/%H' -1
+  [0.3.2p4]=2016-07-07T01:25:32+03:00/fde4d88774c0d4d4444b33f11c60438c43524c2d
+  [0.3.2]=2013-04-25T12:05:18+02:00/0.3.2
+)
+REV_HASH="${GIT_DATEHASH_BY_NAME[${VERSION}]#*/}"
+REV_DATE="${GIT_DATEHASH_BY_NAME[${VERSION}]%%/*}"
+REV_DATE_SHORT="${REV_DATE%%T*}"
+GIT_BASENAME="${GIT_REPO##*/}"
+SRC_URI="${GIT_REPO}/archive/${REV_HASH}/${GIT_BASENAME}-${VERSION}.tar.gz"
+SRC_DIR="${GIT_BASENAME}-${REV_HASH#v}"
+
+################################
+## Patch files
+################################
+# Patch filenames are in a default style of 'git format-patch'
+PATCH_URI=$(\
+  find -maxdepth 1 -type f -name '[0-9][0-9][0-9][0-9]-*.patch' \
+  | sort \
+)
+# Additional patches, if any
 PATCH_URI="
 	0.3.2-compat52.patch
 	0.3.2-install-cmod.patch
 	0.3.2-no-undefined.patch
+	0.3.2-luacrypto_pc.patch
+	0.3.2-tests-Makefile_am.patch
 "
 
+################################
+## Requirements for building
+################################
+BUILD_REQUIRES="\
+  lua\
+  liblua-devel\
+  libssl1.0-devel\
+"
+# TEST_REQUIRES="\
+# "
+
+################################
 PKG_NAMES="${NAME} ${NAME}-devel"
 lua_crypto_CONTENTS=${LUA_LIBDIR#/}" usr/share/doc/"
-lua_crypto_devel_REQUIRES=${NAME}
+
+# Since cygport might add libssl-devel to the requirements of
+# lua-crypto-devel, and we need to remove it by hand in that case.
+lua_crypto_devel_REQUIRES="${NAME} libssl1.0-devel"
 lua_crypto_devel_CONTENTS="usr/include/ usr/lib/pkgconfig/"
 
 # not compatible with OpenSSL 1.1
 export PKG_CONFIG_PATH="/usr/lib/openssl-1.0/lib/pkgconfig"
 DEPS_PATH="/usr/lib/openssl-1.0/lib/pkgconfig"
+
+################################
+src_compile() {
+  cd ${B}
+  lndirs
+  cygautoreconf
+  cygconf
+  cygmake
+}
+
+src_test() {
+  cd ${B}/tests
+  cygmake
+}

@@ -1,0 +1,11 @@
+--- origsrc/luacrypto-0.3.2/luacrypto.pc.in	2016-07-07 07:25:32.000000000 +0900
++++ src/luacrypto-0.3.2/luacrypto.pc.in
+@@ -5,7 +5,7 @@
+ 
+ Name: luacrypto
+ Description: Lua Crypto Library
+ Requires: openssl lua
+ Version: @PACKAGE_VERSION@
+-Libs: ${libdir}/crypto.so
++Libs: ${libdir}/crypto.dll
+ Cflags: -I${includedir}
