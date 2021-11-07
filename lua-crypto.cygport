@@ -1,6 +1,6 @@
 NAME="lua-crypto"
 VERSION=0.3.2p4
-RELEASE=1
+RELEASE=10
 CATEGORY="Lua"
 SUMMARY="Lua OpenSSL bindings"
 DESCRIPTION="\
